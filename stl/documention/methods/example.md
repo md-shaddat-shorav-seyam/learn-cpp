@@ -18,6 +18,8 @@ void print(const string& label, const C& c) {
 // ============================================================
 //  1. VECTOR
 // ============================================================
+
+```cpp
 void demo_vector() {
     cout << "\n===== VECTOR =====\n";
 
@@ -133,10 +135,13 @@ void demo_vector() {
     const vector<int> cv = {10, 20};
     cout << "cbegin(): " << *cv.cbegin() << "\n";           // 10
 }
-
+```
 // ============================================================
 //  2. DEQUE
 // ============================================================
+
+
+```cpp
 void demo_deque() {
     cout << "\n===== DEQUE =====\n";
 
@@ -221,10 +226,12 @@ void demo_deque() {
     deque<int> di = {1, 2, 3};
     cout << "*begin=" << *di.begin() << " *rbegin=" << *di.rbegin() << "\n";
 }
-
+```
 // ============================================================
 //  3. LIST
 // ============================================================
+
+```cpp
 void demo_list() {
     cout << "\n===== LIST =====\n";
 
@@ -344,10 +351,13 @@ void demo_list() {
     // max_size()
     cout << "max_size=" << li.max_size() << "\n";
 }
+```
 
 // ============================================================
 //  4. FORWARD_LIST
 // ============================================================
+
+```cpp
 void demo_forward_list() {
     cout << "\n===== FORWARD_LIST =====\n";
 
@@ -464,10 +474,13 @@ void demo_forward_list() {
     forward_list<int> fli = {1, 2, 3};
     cout << "*begin=" << *fli.begin() << "\n";
 }
-
+```
 // ============================================================
 //  5. ARRAY
 // ============================================================
+
+
+```cpp
 void demo_array() {
     cout << "\n===== ARRAY =====\n";
 
@@ -519,10 +532,11 @@ void demo_array() {
     // std::get<N>()  — compile-time index access
     cout << "get<2>(a) = " << get<2>(a) << "\n";            // 3
 }
-
+```
 // ============================================================
 //  6. SET
 // ============================================================
+```cpp
 void demo_set() {
     cout << "\n===== SET =====\n";
 
@@ -610,10 +624,11 @@ void demo_set() {
     set<int> si = {5, 10, 15};
     cout << "*begin=" << *si.begin() << " *rbegin=" << *si.rbegin() << "\n";
 }
-
+```
 // ============================================================
 //  7. MULTISET
 // ============================================================
+```cpp
 void demo_multiset() {
     cout << "\n===== MULTISET =====\n";
 
@@ -667,10 +682,12 @@ void demo_multiset() {
     // begin/end, rbegin/rend
     cout << "*begin=" << *ms4.begin() << " *rbegin=" << *ms4.rbegin() << "\n";
 }
-
+```
 // ============================================================
 //  8. MAP
 // ============================================================
+
+```cpp
 void demo_map() {
     cout << "\n===== MAP =====\n";
 
@@ -764,10 +781,12 @@ void demo_map() {
     cout << "begin->first=" << miter.begin()->first << "\n";
     cout << "rbegin->first=" << miter.rbegin()->first << "\n";
 }
-
+```
 // ============================================================
 //  9. MULTIMAP
 // ============================================================
+
+```cpp
 void demo_multimap() {
     cout << "\n===== MULTIMAP =====\n";
 
@@ -825,10 +844,11 @@ void demo_multimap() {
     cout << "begin->first=" << mmi.begin()->first << "\n";
     cout << "rbegin->first=" << mmi.rbegin()->first << "\n";
 }
-
+```
 // ============================================================
 //  10. UNORDERED_SET
 // ============================================================
+```cpp
 void demo_unordered_set() {
     cout << "\n===== UNORDERED_SET =====\n";
 
@@ -947,10 +967,13 @@ void demo_unordered_set() {
         }
     }
 }
-
+```
 // ============================================================
 //  11. UNORDERED_MULTISET
 // ============================================================
+
+```cpp
+
 void demo_unordered_multiset() {
     cout << "\n===== UNORDERED_MULTISET =====\n";
 
@@ -1004,10 +1027,11 @@ void demo_unordered_multiset() {
     ux.clear();
     cout << "after clear(), empty=" << ux.empty() << "\n";
 }
-
+```
 // ============================================================
 //  12. UNORDERED_MAP
 // ============================================================
+```cpp
 void demo_unordered_map() {
     cout << "\n===== UNORDERED_MAP =====\n";
 
@@ -1093,10 +1117,12 @@ void demo_unordered_map() {
     unordered_map<string,int> umi = {{"p",1},{"q",2}};
     cout << "first pair: " << umi.begin()->first << "\n";
 }
-
+```
 // ============================================================
 //  13. UNORDERED_MULTIMAP
 // ============================================================
+
+```cpp
 void demo_unordered_multimap() {
     cout << "\n===== UNORDERED_MULTIMAP =====\n";
 
@@ -1158,10 +1184,11 @@ void demo_unordered_multimap() {
     for (auto& [k,v] : ui) cout << k << ":" << v << " ";
     cout << "\n";
 }
-
+```
 // ============================================================
 //  14. STACK
 // ============================================================
+```cpp
 void demo_stack() {
     cout << "\n===== STACK =====\n";
 
@@ -1202,10 +1229,12 @@ void demo_stack() {
     lst_stack.push(6);
     cout << "list-backed stack top=" << lst_stack.top() << "\n"; // 6
 }
-
+```
 // ============================================================
 //  15. QUEUE
 // ============================================================
+
+```cpp
 void demo_queue() {
     cout << "\n===== QUEUE =====\n";
 
@@ -1243,10 +1272,11 @@ void demo_queue() {
     q.swap(q2);
     cout << "after swap, front=" << q.front() << "\n";       // 99
 }
-
+```
 // ============================================================
 //  16. PRIORITY_QUEUE
 // ============================================================
+```cpp
 void demo_priority_queue() {
     cout << "\n===== PRIORITY_QUEUE =====\n";
 
@@ -1294,10 +1324,11 @@ void demo_priority_queue() {
     priority_queue<int> pq3(v.begin(), v.end());
     cout << "built from range, top=" << pq3.top() << "\n";  // 8
 }
-
+```
 // ============================================================
 //  MAIN
 // ============================================================
+```cpp
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
@@ -1322,3 +1353,4 @@ int main() {
     cout << "\nAll demos complete.\n";
     return 0;
 }
+```
