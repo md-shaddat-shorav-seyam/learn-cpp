@@ -524,3 +524,211 @@ int l = lcm(4,  6);  // 12
 | Set ops | `<algorithm>` | `set_union`, `set_intersection`, `set_difference` |
 | Heap | `<algorithm>` | `make_heap`, `push_heap`, `pop_heap`, `sort_heap` |
 | Numeric | `<numeric>` | `accumulate`, `iota`, `partial_sum`, `gcd`, `lcm` |
+
+
+
+
+# STL Algorithm Compatibility by Container
+
+## Quick Answer
+
+Most STL algorithms work on **any container** that provides the **required iterator type**. The restrictions come from **iterator category requirements**, not the container itself.
+
+---
+
+## Iterator Categories (Prerequisite)
+
+```
+Random Access > Bidirectional > Forward > Input/Output
+     ↑               ↑            ↑           ↑
+  vector           list         forward_    istream
+  deque            set          list
+  array            map
+  string
+```
+
+| Container | Iterator Type |
+|---|---|
+| `vector`, `array`, `deque`, `string` | ✅ Random Access |
+| `list`, `set`, `map`, `multiset`, `multimap` | ✅ Bidirectional |
+| `forward_list`, `unordered_map`, `unordered_set` | ⚠️ Forward Only |
+| `istream_iterator` | ❌ Input Only |
+
+---
+
+## Algorithms That DON'T Work on Certain Containers
+
+### 🔴 Require Random Access Iterator
+> ❌ Won't work on: `list`, `set`, `map`, `forward_list`, `unordered_*`
+
+| Algorithm | Reason |
+|---|---|
+| `sort` | Needs random jumps to swap distant elements |
+| `stable_sort` | Same as sort |
+| `partial_sort` | Same as sort |
+| `nth_element` | Needs O(1) index access |
+| `is_sorted_until` | Needs `it + n` arithmetic |
+| `random_shuffle` / `shuffle` | Needs index-based access |
+| `binary_search` | Needs O(1) mid-point jump |
+| `lower_bound` *(fast ver.)* | O(log n) only with random access |
+| `upper_bound` *(fast ver.)* | Same as lower_bound |
+| `equal_range` *(fast ver.)* | Same |
+
+```cpp
+list<int> lst{3,1,4,1,5};
+
+// ❌ COMPILE ERROR — list has no random access iterator
+sort(lst.begin(), lst.end());
+
+// ✅ USE INSTEAD — list has its own member sort
+lst.sort();
+```
+
+---
+
+### 🟠 Require Bidirectional Iterator
+> ❌ Won't work on: `forward_list`, `unordered_map`, `unordered_set`
+
+| Algorithm | Reason |
+|---|---|
+| `reverse` | Needs to move both forward and backward |
+| `prev_permutation` | Needs backward traversal |
+| `next_permutation` | Needs backward traversal |
+| `inplace_merge` | Needs bidirectional movement |
+| `copy_backward` | Copies from the end, needs `--it` |
+| `move_backward` | Same as copy_backward |
+
+```cpp
+forward_list<int> fl{1,2,3,4,5};
+
+// ❌ COMPILE ERROR — forward_list is forward-only
+reverse(fl.begin(), fl.end());
+
+// ✅ USE INSTEAD
+fl.reverse(); // member function
+```
+
+---
+
+### 🟡 Don't Work on Associative Containers (`set`, `map`, etc.)
+> Because their elements are **const / key-immutable** — you can't modify them in-place.
+
+| Algorithm | Reason |
+|---|---|
+| `sort` | Elements are already ordered; keys are `const` |
+| `remove` / `remove_if` | Can't overwrite elements in-place |
+| `fill` | Can't assign new values to keys |
+| `replace` | Same — keys are immutable |
+| `generate` | Can't overwrite |
+| `transform` *(in-place)* | Output iterator can't write to set/map |
+| `rotate` | Needs writable random access |
+| `reverse` | Keys are `const` in set |
+
+```cpp
+set<int> s{3,1,4,1,5};
+
+// ❌ WRONG — set keys are const, can't sort (already sorted anyway)
+sort(s.begin(), s.end());
+
+// ❌ WRONG — remove doesn't work on set
+remove(s.begin(), s.end(), 3);
+
+// ✅ USE INSTEAD
+s.erase(3); // member function
+```
+
+---
+
+### 🟡 Don't Work on `unordered_*` Containers
+
+| Algorithm | Reason |
+|---|---|
+| `sort` | No random access + hash order isn't sortable |
+| `binary_search` | Requires sorted range |
+| `lower_bound` | Requires sorted range |
+| `upper_bound` | Requires sorted range |
+| `set_union` / `set_intersection` etc. | Require sorted input |
+| `next_permutation` | Needs bidirectional iterator |
+
+```cpp
+unordered_set<int> us{3,1,4,1,5};
+
+// ❌ Won't compile or give wrong results
+sort(us.begin(), us.end());
+binary_search(us.begin(), us.end(), 3);
+
+// ✅ USE INSTEAD
+us.find(3); // O(1) hash lookup — member function
+us.count(3);
+```
+
+---
+
+### 🔵 `forward_list` Specific Restrictions
+> `forward_list` is the most restricted STL container.
+
+```cpp
+forward_list<int> fl{3,1,4,2,5};
+
+// ❌ All of these FAIL on forward_list:
+sort(fl.begin(), fl.end());       // needs random access
+reverse(fl.begin(), fl.end());    // needs bidirectional
+copy_backward(...);               // needs bidirectional
+inplace_merge(...);               // needs bidirectional
+
+// ✅ Use member functions instead:
+fl.sort();            // built-in sort
+fl.reverse();         // built-in reverse
+fl.remove(3);         // built-in remove
+fl.unique();          // built-in unique
+fl.merge(fl2);        // built-in merge
+```
+
+---
+
+## Full Compatibility Matrix
+
+| Algorithm | `vector` | `list` | `forward_list` | `set/map` | `unordered_*` |
+|---|:---:|:---:|:---:|:---:|:---:|
+| `sort` | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `stable_sort` | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `partial_sort` | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `nth_element` | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `reverse` | ✅ | ✅ | ❌ | ❌* | ❌ |
+| `binary_search` | ✅ | ⚠️ slow | ⚠️ slow | ❌ | ❌ |
+| `lower_bound` | ✅ fast | ⚠️ slow | ⚠️ slow | use `.lower_bound()` | ❌ |
+| `upper_bound` | ✅ fast | ⚠️ slow | ⚠️ slow | use `.upper_bound()` | ❌ |
+| `find` | ✅ | ✅ | ✅ | ⚠️ slow | use `.find()` |
+| `count` | ✅ | ✅ | ✅ | ⚠️ slow | use `.count()` |
+| `copy` | ✅ | ✅ | ✅ | ✅ src only | ✅ src only |
+| `copy_backward` | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `fill` | ✅ | ✅ | ✅ | ❌ | ❌ |
+| `replace` | ✅ | ✅ | ✅ | ❌ | ❌ |
+| `remove` | ✅ | ✅ | ✅ | ❌ | ❌ |
+| `rotate` | ✅ | ✅ | ⚠️ C++11 | ❌ | ❌ |
+| `shuffle` | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `next_permutation` | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `inplace_merge` | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `for_each` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `transform` | ✅ | ✅ | ✅ | ✅ src | ✅ src |
+| `accumulate` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `set_union` etc. | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `make_heap` | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `all_of/any_of` | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+> **Legend:** ✅ Works | ❌ Won't compile or incorrect | ⚠️ Works but O(n) instead of O(log n) | `*` keys are const
+
+---
+
+## Key Takeaway
+
+```
+If the algorithm needs...        Then it won't work on...
+─────────────────────────────────────────────────────────
+Random Access Iterator      →    list, set, map, forward_list, unordered_*
+Bidirectional Iterator      →    forward_list, unordered_*
+Mutable elements            →    set, map, multiset, multimap, unordered_*
+Sorted input                →    unordered_* (hash order ≠ sorted order)
+```
+
+> **Rule of thumb:** If your container has a **member function** with the same name as an STL algorithm (e.g. `list::sort`, `set::find`, `forward_list::reverse`), always **prefer the member function** — it's optimized for that container's structure.
