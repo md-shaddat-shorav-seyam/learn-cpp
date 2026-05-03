@@ -1,312 +1,526 @@
+# STL `<algorithm>` & `<numeric>` — Complete Reference
+
+> All functions use iterator pairs as range. Functions marked `📦 <numeric>` require `#include <numeric>`.
+
+---
+
+## 1. Sorting
+
+| Function | Description |
+|---|---|
+| `sort` | Sorts in ascending order (or custom comparator) |
+| `stable_sort` | Sort preserving relative order of equal elements |
+| `partial_sort` | Sorts only first N elements |
+| `nth_element` | Places correct element at nth position |
+| `is_sorted` | Returns `true` if range is sorted |
+| `is_sorted_until` | Iterator to first unsorted element |
+
+```cpp
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+vector<int> v{5, 2, 8, 1, 9, 3};
+
+// sort
+sort(v.begin(), v.end());
+// v → {1, 2, 3, 5, 8, 9}
+
+// stable_sort
+stable_sort(v.begin(), v.end(), greater<int>());
+// v → {9, 8, 5, 3, 2, 1}  (equal elements keep relative order)
 
-<style>
-h2.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans);color:var(--color-text-primary)}
-.wrap{padding:1rem 0}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
-.tab{padding:5px 14px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;font-size:13px;color:var(--color-text-secondary);transition:all .15s}
-.tab.active{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
-.tab:hover:not(.active){background:var(--color-background-secondary)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
-.fn-name{font-family:var(--font-mono);font-size:14px;font-weight:500;color:var(--color-text-info)}
-.fn-desc{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
-.code-block{background:var(--color-background-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;font-family:var(--font-mono);font-size:12px;line-height:1.7;color:var(--color-text-primary);white-space:pre;overflow-x:auto}
-.output{font-family:var(--font-mono);font-size:12px;color:var(--color-text-success);background:var(--color-background-success);border-radius:var(--border-radius-md);padding:6px 10px;margin-top:2px}
-.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:12px;font-weight:500;margin-bottom:2px}
-.badge-sort{background:#E6F1FB;color:#0C447C}
-.badge-search{background:#E1F5EE;color:#085041}
-.badge-count{background:#FAEEDA;color:#633806}
-.badge-mod{background:#FBEAF0;color:#72243E}
-.badge-perm{background:#EEEDFE;color:#3C3489}
-.badge-minmax{background:#EAF3DE;color:#27500A}
-.badge-set{background:#FAECE7;color:#712B13}
-.badge-heap{background:#F1EFE8;color:#444441}
-.badge-num{background:#FCEBEB;color:#791F1F}
-.hidden{display:none}
-</style>
-<h2 class="sr-only">STL algorithm library reference with examples for every function, organized by category</h2>
-<div class="wrap">
-<div class="tabs" id="tabs"></div>
-<div class="grid" id="grid"></div>
-</div>
-<script>
-const cats=[
-  {id:"all",label:"All"},
-  {id:"sort",label:"Sorting"},
-  {id:"search",label:"Searching"},
-  {id:"count",label:"Counting"},
-  {id:"mod",label:"Modifying"},
-  {id:"perm",label:"Permutations"},
-  {id:"minmax",label:"Min / Max"},
-  {id:"set",label:"Set ops"},
-  {id:"heap",label:"Heap"},
-  {id:"num",label:"Numeric"},
-];
-
-const fns=[
-  {cat:"sort",name:"std::sort",desc:"Sorts elements in ascending order (or custom comparator).",
-   code:`vector<int> v{5,2,8,1,9,3};\nsort(v.begin(), v.end());\n// v → {1,2,3,5,8,9}`,out:"→ 1 2 3 5 8 9"},
-
-  {cat:"sort",name:"std::stable_sort",desc:"Like sort but preserves relative order of equal elements.",
-   code:`sort by last name, stable_sort by age\n// equal ages keep original order`,out:"→ order preserved"},
-
-  {cat:"sort",name:"std::partial_sort",desc:"Sorts only the first N elements.",
-   code:`vector<int> v{5,2,8,1,9,3};\npartial_sort(v.begin(),v.begin()+3,v.end());\n// v → {1,2,3,9,8,5}`,out:"→ 1 2 3 | rest unspecified"},
-
-  {cat:"sort",name:"std::nth_element",desc:"Rearranges so that nth position holds the element it would have if sorted.",
-   code:`vector<int> v{5,2,8,1,9,3};\nnth_element(v.begin(),v.begin()+2,v.end());\n// v[2] == 3 (3rd smallest)`,out:"→ v[2] = 3"},
-
-  {cat:"sort",name:"std::is_sorted",desc:"Returns true if range is sorted.",
-   code:`vector<int> v{1,2,3,4};\nbool ok = is_sorted(v.begin(), v.end());\n// ok == true`,out:"→ true"},
-
-  {cat:"sort",name:"std::is_sorted_until",desc:"Returns iterator to first unsorted element.",
-   code:`vector<int> v{1,2,5,3,4};\nauto it = is_sorted_until(v.begin(),v.end());\n// it points to 3`,out:"→ iterator to 3"},
-
-  {cat:"search",name:"std::find",desc:"Finds first occurrence of a value.",
-   code:`vector<int> v{1,2,3,4,5};\nauto it = find(v.begin(), v.end(), 3);\n// *it == 3`,out:"→ iterator to 3"},
+// partial_sort — only first 3 sorted
+partial_sort(v.begin(), v.begin() + 3, v.end());
+// v → {1, 2, 3, 9, 8, 5}
 
-  {cat:"search",name:"std::find_if",desc:"Finds first element satisfying predicate.",
-   code:`auto it = find_if(v.begin(), v.end(),\n  [](int x){ return x > 3; });\n// *it == 4`,out:"→ iterator to 4"},
-
-  {cat:"search",name:"std::find_if_not",desc:"Finds first element NOT satisfying predicate.",
-   code:`auto it = find_if_not(v.begin(), v.end(),\n  [](int x){ return x < 4; });\n// *it == 4`,out:"→ iterator to 4"},
-
-  {cat:"search",name:"std::binary_search",desc:"Returns true if value exists in sorted range.",
-   code:`vector<int> v{1,2,3,4,5};\nbool found = binary_search(v.begin(),v.end(),3);\n// found == true`,out:"→ true"},
-
-  {cat:"search",name:"std::lower_bound",desc:"Returns iterator to first element >= value (sorted).",
-   code:`auto it = lower_bound(v.begin(),v.end(),3);\n// *it == 3`,out:"→ iterator to 3"},
-
-  {cat:"search",name:"std::upper_bound",desc:"Returns iterator to first element > value (sorted).",
-   code:`auto it = upper_bound(v.begin(),v.end(),3);\n// *it == 4`,out:"→ iterator to 4"},
-
-  {cat:"search",name:"std::equal_range",desc:"Returns pair of [lower_bound, upper_bound].",
-   code:`auto [lo,hi] = equal_range(v.begin(),v.end(),3);\n// range containing all 3s`,out:"→ [lo, hi) = 3"},
-
-  {cat:"search",name:"std::search",desc:"Finds a subsequence inside a range.",
-   code:`vector<int> v{1,2,3,4,5}, sub{3,4};\nauto it = search(v.begin(),v.end(),\n  sub.begin(),sub.end());\n// *it == 3`,out:"→ iterator to 3"},
-
-  {cat:"search",name:"std::adjacent_find",desc:"Finds first pair of adjacent equal (or matching) elements.",
-   code:`vector<int> v{1,2,2,3,4};\nauto it = adjacent_find(v.begin(),v.end());\n// *it == 2`,out:"→ iterator to first 2"},
-
-  {cat:"count",name:"std::count",desc:"Counts elements equal to a value.",
-   code:`vector<int> v{1,2,3,2,1};\nint n = count(v.begin(), v.end(), 2);\n// n == 2`,out:"→ 2"},
-
-  {cat:"count",name:"std::count_if",desc:"Counts elements satisfying a predicate.",
-   code:`int n = count_if(v.begin(), v.end(),\n  [](int x){ return x % 2 == 0; });\n// n == 2 (evens: 2,2)`,out:"→ 2"},
-
-  {cat:"mod",name:"std::copy",desc:"Copies elements to another range.",
-   code:`vector<int> src{1,2,3}, dst(3);\ncopy(src.begin(),src.end(),dst.begin());\n// dst == {1,2,3}`,out:"→ dst = 1 2 3"},
-
-  {cat:"mod",name:"std::copy_if",desc:"Copies elements satisfying predicate.",
-   code:`copy_if(src.begin(),src.end(),\n  back_inserter(dst),\n  [](int x){ return x>1; });\n// dst == {2,3}`,out:"→ dst = 2 3"},
-
-  {cat:"mod",name:"std::transform",desc:"Applies a function to each element, storing result.",
-   code:`vector<int> v{1,2,3}, out(3);\ntransform(v.begin(),v.end(),out.begin(),\n  [](int x){ return x*x; });\n// out == {1,4,9}`,out:"→ 1 4 9"},
-
-  {cat:"mod",name:"std::fill",desc:"Assigns a value to every element in a range.",
-   code:`vector<int> v(5);\nfill(v.begin(), v.end(), 7);\n// v == {7,7,7,7,7}`,out:"→ 7 7 7 7 7"},
-
-  {cat:"mod",name:"std::fill_n",desc:"Assigns value to first N elements.",
-   code:`fill_n(v.begin(), 3, 0);\n// first 3 → {0,0,0,7,7}`,out:"→ 0 0 0 7 7"},
-
-  {cat:"mod",name:"std::replace",desc:"Replaces all occurrences of old_val with new_val.",
-   code:`vector<int> v{1,2,3,2,1};\nreplace(v.begin(),v.end(), 2, 99);\n// v == {1,99,3,99,1}`,out:"→ 1 99 3 99 1"},
-
-  {cat:"mod",name:"std::replace_if",desc:"Replaces elements satisfying predicate.",
-   code:`replace_if(v.begin(),v.end(),\n  [](int x){return x<3;}, 0);\n// 1,2 → 0`,out:"→ 0 0 3 0 0"},
-
-  {cat:"mod",name:"std::remove",desc:"Logically removes elements equal to value (doesn't resize).",
-   code:`vector<int> v{1,2,3,2,1};\nauto end = remove(v.begin(),v.end(),2);\nv.erase(end, v.end());\n// v == {1,3,1}`,out:"→ 1 3 1"},
-
-  {cat:"mod",name:"std::remove_if",desc:"Logically removes elements satisfying predicate.",
-   code:`auto end = remove_if(v.begin(),v.end(),\n  [](int x){return x%2==0;});\nv.erase(end,v.end());`,out:"→ removes evens"},
-
-  {cat:"mod",name:"std::unique",desc:"Removes consecutive duplicates.",
-   code:`vector<int> v{1,1,2,3,3,3,4};\nauto end = unique(v.begin(),v.end());\nv.erase(end,v.end());\n// v == {1,2,3,4}`,out:"→ 1 2 3 4"},
-
-  {cat:"mod",name:"std::reverse",desc:"Reverses the order of elements in a range.",
-   code:`vector<int> v{1,2,3,4,5};\nreverse(v.begin(), v.end());\n// v == {5,4,3,2,1}`,out:"→ 5 4 3 2 1"},
-
-  {cat:"mod",name:"std::rotate",desc:"Rotates elements so that a given iterator becomes the first.",
-   code:`vector<int> v{1,2,3,4,5};\nrotate(v.begin(),v.begin()+2,v.end());\n// v == {3,4,5,1,2}`,out:"→ 3 4 5 1 2"},
-
-  {cat:"mod",name:"std::shuffle",desc:"Randomly shuffles elements (needs a random engine).",
-   code:`mt19937 rng(42);\nvector<int> v{1,2,3,4,5};\nshuffle(v.begin(),v.end(),rng);`,out:"→ random order"},
-
-  {cat:"mod",name:"std::for_each",desc:"Applies a function to every element (for side effects).",
-   code:`vector<int> v{1,2,3};\nfor_each(v.begin(),v.end(),\n  [](int x){ cout << x << ' '; });\n// prints 1 2 3`,out:"→ 1 2 3"},
-
-  {cat:"mod",name:"std::generate",desc:"Fills range using a generator function.",
-   code:`int i=0;\nvector<int> v(5);\ngenerate(v.begin(),v.end(),[&]{ return i++; });\n// v == {0,1,2,3,4}`,out:"→ 0 1 2 3 4"},
-
-  {cat:"mod",name:"std::swap_ranges",desc:"Swaps elements of two ranges.",
-   code:`vector<int> a{1,2,3}, b{4,5,6};\nswap_ranges(a.begin(),a.end(),b.begin());\n// a=={4,5,6}, b=={1,2,3}`,out:"→ a=4 5 6 b=1 2 3"},
-
-  {cat:"mod",name:"std::merge",desc:"Merges two sorted ranges into one sorted output.",
-   code:`vector<int> a{1,3,5}, b{2,4,6}, out;\nmerge(a.begin(),a.end(),\n  b.begin(),b.end(),\n  back_inserter(out));\n// out=={1,2,3,4,5,6}`,out:"→ 1 2 3 4 5 6"},
-
-  {cat:"mod",name:"std::inplace_merge",desc:"Merges two consecutive sorted sub-ranges in place.",
-   code:`vector<int> v{1,3,5,2,4,6};\ninplace_merge(v.begin(),v.begin()+3,v.end());\n// v == {1,2,3,4,5,6}`,out:"→ 1 2 3 4 5 6"},
-
-  {cat:"perm",name:"std::next_permutation",desc:"Transforms to next lexicographic permutation; returns false if last.",
-   code:`string s = "abc";\nnext_permutation(s.begin(),s.end());\n// s == "acb"`,out:"→ acb"},
-
-  {cat:"perm",name:"std::prev_permutation",desc:"Transforms to previous lexicographic permutation.",
-   code:`string s = "bca";\nprev_permutation(s.begin(),s.end());\n// s == "bac"`,out:"→ bac"},
-
-  {cat:"perm",name:"std::is_permutation",desc:"Returns true if one range is a permutation of another.",
-   code:`vector<int> a{1,2,3}, b{3,1,2};\nbool ok = is_permutation(a.begin(),a.end(),\n  b.begin());\n// ok == true`,out:"→ true"},
-
-  {cat:"minmax",name:"std::min",desc:"Returns the smaller of two values.",
-   code:`int a = min(3, 7);\n// a == 3`,out:"→ 3"},
-
-  {cat:"minmax",name:"std::max",desc:"Returns the larger of two values.",
-   code:`int a = max(3, 7);\n// a == 7`,out:"→ 7"},
-
-  {cat:"minmax",name:"std::minmax",desc:"Returns a pair {min, max} of two values.",
-   code:`auto [lo,hi] = minmax(3, 7);\n// lo==3, hi==7`,out:"→ {3, 7}"},
-
-  {cat:"minmax",name:"std::min_element",desc:"Returns iterator to smallest element in range.",
-   code:`vector<int> v{3,1,4,1,5};\nauto it = min_element(v.begin(),v.end());\n// *it == 1`,out:"→ 1"},
-
-  {cat:"minmax",name:"std::max_element",desc:"Returns iterator to largest element in range.",
-   code:`auto it = max_element(v.begin(),v.end());\n// *it == 5`,out:"→ 5"},
-
-  {cat:"minmax",name:"std::minmax_element",desc:"Returns pair of iterators to min and max.",
-   code:`auto [mn,mx] = minmax_element(v.begin(),v.end());\n// *mn==1, *mx==5`,out:"→ {1, 5}"},
-
-  {cat:"minmax",name:"std::clamp",desc:"Clamps a value between lo and hi bounds.",
-   code:`int a = clamp(10, 1, 5);\n// a == 5  (clamped to max)`,out:"→ 5"},
-
-  {cat:"set",name:"std::set_union",desc:"Produces union of two sorted sets.",
-   code:`vector<int> a{1,2,3}, b{2,3,4}, out;\nset_union(a.begin(),a.end(),\n  b.begin(),b.end(),back_inserter(out));\n// out == {1,2,3,4}`,out:"→ 1 2 3 4"},
-
-  {cat:"set",name:"std::set_intersection",desc:"Produces intersection of two sorted sets.",
-   code:`set_intersection(a.begin(),a.end(),\n  b.begin(),b.end(),back_inserter(out));\n// out == {2,3}`,out:"→ 2 3"},
-
-  {cat:"set",name:"std::set_difference",desc:"Produces elements in first set not in second.",
-   code:`set_difference(a.begin(),a.end(),\n  b.begin(),b.end(),back_inserter(out));\n// out == {1}`,out:"→ 1"},
-
-  {cat:"set",name:"std::set_symmetric_difference",desc:"Produces elements in exactly one of the two sets.",
-   code:`set_symmetric_difference(a.begin(),a.end(),\n  b.begin(),b.end(),back_inserter(out));\n// out == {1,4}`,out:"→ 1 4"},
-
-  {cat:"set",name:"std::includes",desc:"Returns true if one sorted range is a subset of another.",
-   code:`bool ok = includes(a.begin(),a.end(),\n  b.begin(),b.end());\n// false — {2,3,4} not subset of {1,2,3}`,out:"→ false"},
-
-  {cat:"heap",name:"std::make_heap",desc:"Rearranges range into a max-heap.",
-   code:`vector<int> v{3,1,4,1,5,9};\nmake_heap(v.begin(),v.end());\n// v[0] == 9 (max at front)`,out:"→ v[0] = 9"},
-
-  {cat:"heap",name:"std::push_heap",desc:"After push_back, inserts new element into heap.",
-   code:`v.push_back(7);\npush_heap(v.begin(),v.end());\n// heap property maintained`,out:"→ heap valid"},
-
-  {cat:"heap",name:"std::pop_heap",desc:"Moves the max element to end; call pop_back to remove.",
-   code:`pop_heap(v.begin(),v.end());\nv.pop_back();\n// max removed`,out:"→ max removed"},
-
-  {cat:"heap",name:"std::sort_heap",desc:"Sorts a heap into ascending order.",
-   code:`sort_heap(v.begin(),v.end());\n// v now sorted ascending`,out:"→ sorted"},
-
-  {cat:"heap",name:"std::is_heap",desc:"Returns true if range satisfies heap property.",
-   code:`bool ok = is_heap(v.begin(),v.end());\n// ok == true after make_heap`,out:"→ true"},
-
-  {cat:"heap",name:"std::is_heap_until",desc:"Returns iterator to first element violating heap property.",
-   code:`auto it = is_heap_until(v.begin(),v.end());`,out:"→ first bad element"},
-
-  {cat:"num",name:"std::accumulate",desc:"Computes the sum (or custom fold) of a range. (In <numeric>)",
-   code:`vector<int> v{1,2,3,4,5};\nint sum = accumulate(v.begin(),v.end(),0);\n// sum == 15`,out:"→ 15"},
-
-  {cat:"num",name:"std::iota",desc:"Fills range with incrementing sequence. (In <numeric>)",
-   code:`vector<int> v(5);\niota(v.begin(),v.end(),1);\n// v == {1,2,3,4,5}`,out:"→ 1 2 3 4 5"},
-
-  {cat:"num",name:"std::inner_product",desc:"Computes dot product of two ranges. (In <numeric>)",
-   code:`vector<int> a{1,2,3}, b{4,5,6};\nint dot = inner_product(\n  a.begin(),a.end(),b.begin(),0);\n// 1*4+2*5+3*6 == 32`,out:"→ 32"},
-
-  {cat:"num",name:"std::partial_sum",desc:"Computes prefix sums. (In <numeric>)",
-   code:`vector<int> v{1,2,3,4,5}, out(5);\npartial_sum(v.begin(),v.end(),out.begin());\n// out == {1,3,6,10,15}`,out:"→ 1 3 6 10 15"},
-
-  {cat:"num",name:"std::adjacent_difference",desc:"Computes differences of adjacent elements. (In <numeric>)",
-   code:`vector<int> v{1,3,6,10}, out(4);\nadjacent_difference(v.begin(),v.end(),out.begin());\n// out == {1,2,3,4}`,out:"→ 1 2 3 4"},
-
-  {cat:"num",name:"std::gcd",desc:"Greatest common divisor of two integers. (In <numeric>)",
-   code:`int g = gcd(12, 18);\n// g == 6`,out:"→ 6"},
-
-  {cat:"num",name:"std::lcm",desc:"Least common multiple of two integers. (In <numeric>)",
-   code:`int l = lcm(4, 6);\n// l == 12`,out:"→ 12"},
-
-  {cat:"mod",name:"std::all_of",desc:"Returns true if ALL elements satisfy predicate.",
-   code:`vector<int> v{2,4,6,8};\nbool ok = all_of(v.begin(),v.end(),\n  [](int x){return x%2==0;});\n// ok == true`,out:"→ true"},
-
-  {cat:"mod",name:"std::any_of",desc:"Returns true if ANY element satisfies predicate.",
-   code:`bool ok = any_of(v.begin(),v.end(),\n  [](int x){return x>5;});\n// ok == true`,out:"→ true"},
-
-  {cat:"mod",name:"std::none_of",desc:"Returns true if NO element satisfies predicate.",
-   code:`bool ok = none_of(v.begin(),v.end(),\n  [](int x){return x<0;});\n// ok == true`,out:"→ true"},
-
-  {cat:"mod",name:"std::equal",desc:"Returns true if two ranges are element-wise equal.",
-   code:`vector<int> a{1,2,3}, b{1,2,3};\nbool ok = equal(a.begin(),a.end(),b.begin());\n// ok == true`,out:"→ true"},
-
-  {cat:"mod",name:"std::mismatch",desc:"Returns iterators to first mismatched pair in two ranges.",
-   code:`vector<int> a{1,2,3}, b{1,9,3};\nauto [ia,ib] = mismatch(a.begin(),a.end(),b.begin());\n// *ia==2, *ib==9`,out:"→ 2 vs 9"},
-
-  {cat:"mod",name:"std::lexicographical_compare",desc:"Returns true if first range is lexicographically less.",
-   code:`bool ok = lexicographical_compare(\n  a.begin(),a.end(),b.begin(),b.end());\n// true if a < b`,out:"→ true/false"},
-
-  {cat:"mod",name:"std::move",desc:"Moves elements from source to destination range.",
-   code:`vector<string> src{"a","b","c"}, dst(3);\nmove(src.begin(),src.end(),dst.begin());\n// src elements in valid but unspecified state`,out:"→ dst has values"},
-
-  {cat:"mod",name:"std::copy_backward",desc:"Copies range to destination starting from the end.",
-   code:`vector<int> v{1,2,3,4,5};\ncopy_backward(v.begin(),v.begin()+3,v.end());\n// v=={1,2,1,2,3}`,out:"→ 1 2 1 2 3"},
-
-  {cat:"mod",name:"std::sample",desc:"Randomly selects N elements from range (C++17).",
-   code:`mt19937 rng(42);\nvector<int> v{1,2,3,4,5}, out;\nsample(v.begin(),v.end(),\n  back_inserter(out),3,rng);`,out:"→ 3 random elements"},
-
-  {cat:"mod",name:"std::partition",desc:"Reorders elements so those satisfying predicate come first.",
-   code:`vector<int> v{1,2,3,4,5};\npartition(v.begin(),v.end(),\n  [](int x){return x%2==0;});\n// evens first`,out:"→ 2 4 | 1 3 5"},
-
-  {cat:"mod",name:"std::stable_partition",desc:"Like partition but preserves relative order.",
-   code:`stable_partition(v.begin(),v.end(),\n  [](int x){return x%2==0;});\n// order preserved within groups`,out:"→ 2 4 1 3 5"},
-
-  {cat:"mod",name:"std::partition_point",desc:"Returns iterator to first element in second partition (range must be partitioned).",
-   code:`auto it = partition_point(v.begin(),v.end(),\n  [](int x){return x%2==0;});\n// *it == first odd`,out:"→ iterator to 1st odd"},
-];
-
-const badgeClass = {sort:"badge-sort",search:"badge-search",count:"badge-count",mod:"badge-mod",perm:"badge-perm",minmax:"badge-minmax",set:"badge-set",heap:"badge-heap",num:"badge-num"};
-const catLabel = {sort:"Sorting",search:"Searching",count:"Counting",mod:"Modifying",perm:"Permutations",minmax:"Min/Max",set:"Set ops",heap:"Heap",num:"Numeric"};
-
-const tabsEl = document.getElementById("tabs");
-const gridEl = document.getElementById("grid");
-
-cats.forEach(c=>{
-  const b = document.createElement("button");
-  b.className="tab"+(c.id==="all"?" active":"");
-  b.textContent=c.label;
-  b.dataset.id=c.id;
-  b.onclick=()=>{
-    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-    b.classList.add("active");
-    render(c.id);
-  };
-  tabsEl.appendChild(b);
-});
-
-function render(cat){
-  gridEl.innerHTML="";
-  const list = cat==="all"?fns:fns.filter(f=>f.cat===cat);
-  list.forEach(f=>{
-    const card = document.createElement("div");
-    card.className="card";
-    card.innerHTML=`
-      <span class="badge ${badgeClass[f.cat]}">${catLabel[f.cat]}</span>
-      <div class="fn-name">${f.name}</div>
-      <div class="fn-desc">${f.desc}</div>
-      <div class="code-block">${f.code}</div>
-      <div class="output">${f.output||""}</div>
-    `;
-    gridEl.appendChild(card);
-  });
-}
-
-render("all");
-</script>
+// nth_element — v[2] = 3rd smallest
+nth_element(v.begin(), v.begin() + 2, v.end());
+// v[2] == 3
+
+// is_sorted
+bool ok = is_sorted(v.begin(), v.end());
+// ok == true
+
+// is_sorted_until
+vector<int> u{1, 2, 5, 3, 4};
+auto it = is_sorted_until(u.begin(), u.end());
+// *it == 3
+```
+
+---
+
+## 2. Searching
+
+| Function | Description |
+|---|---|
+| `find` | First occurrence of value |
+| `find_if` | First element satisfying predicate |
+| `find_if_not` | First element NOT satisfying predicate |
+| `binary_search` | Returns `true` if value exists (sorted range) |
+| `lower_bound` | Iterator to first element `>=` value |
+| `upper_bound` | Iterator to first element `>` value |
+| `equal_range` | Pair of `[lower_bound, upper_bound]` |
+| `search` | Finds a subsequence inside a range |
+| `adjacent_find` | First pair of adjacent equal elements |
+
+```cpp
+vector<int> v{1, 2, 3, 4, 5};
+
+// find
+auto it = find(v.begin(), v.end(), 3);
+// *it == 3
+
+// find_if
+auto it2 = find_if(v.begin(), v.end(), [](int x){ return x > 3; });
+// *it2 == 4
+
+// find_if_not
+auto it3 = find_if_not(v.begin(), v.end(), [](int x){ return x < 4; });
+// *it3 == 4
+
+// binary_search (requires sorted range)
+bool found = binary_search(v.begin(), v.end(), 3);
+// found == true
+
+// lower_bound
+auto lo = lower_bound(v.begin(), v.end(), 3);
+// *lo == 3
+
+// upper_bound
+auto hi = upper_bound(v.begin(), v.end(), 3);
+// *hi == 4
+
+// equal_range
+auto [low, high] = equal_range(v.begin(), v.end(), 3);
+// *low == 3, *high == 4
+
+// search (find subsequence)
+vector<int> sub{3, 4};
+auto pos = search(v.begin(), v.end(), sub.begin(), sub.end());
+// *pos == 3
+
+// adjacent_find
+vector<int> w{1, 2, 2, 3};
+auto adj = adjacent_find(w.begin(), w.end());
+// *adj == 2
+```
+
+---
+
+## 3. Counting
+
+| Function | Description |
+|---|---|
+| `count` | Count elements equal to value |
+| `count_if` | Count elements satisfying predicate |
+
+```cpp
+vector<int> v{1, 2, 3, 2, 1};
+
+// count
+int n = count(v.begin(), v.end(), 2);
+// n == 2
+
+// count_if
+int evens = count_if(v.begin(), v.end(), [](int x){ return x % 2 == 0; });
+// evens == 2
+```
+
+---
+
+## 4. Modifying Algorithms
+
+| Function | Description |
+|---|---|
+| `copy` | Copy range to another |
+| `copy_if` | Copy elements satisfying predicate |
+| `copy_backward` | Copy range starting from the end |
+| `move` | Move elements to destination range |
+| `transform` | Apply function, store result |
+| `fill` | Assign value to every element |
+| `fill_n` | Assign value to first N elements |
+| `generate` | Fill with generator function |
+| `replace` | Replace all old_val with new_val |
+| `replace_if` | Replace elements satisfying predicate |
+| `remove` | Logically remove elements equal to value |
+| `remove_if` | Logically remove elements by predicate |
+| `unique` | Remove consecutive duplicates |
+| `reverse` | Reverse a range |
+| `rotate` | Rotate elements left |
+| `shuffle` | Randomly shuffle elements |
+| `sample` | Pick N random elements (C++17) |
+| `for_each` | Apply function for side effects |
+| `swap_ranges` | Swap two ranges element-wise |
+| `merge` | Merge two sorted ranges |
+| `inplace_merge` | Merge two consecutive sorted sub-ranges |
+
+```cpp
+vector<int> v{1, 2, 3, 4, 5};
+
+// copy
+vector<int> dst(5);
+copy(v.begin(), v.end(), dst.begin());
+// dst == {1,2,3,4,5}
+
+// copy_if
+vector<int> out;
+copy_if(v.begin(), v.end(), back_inserter(out), [](int x){ return x > 2; });
+// out == {3,4,5}
+
+// copy_backward
+vector<int> b{1,2,3,4,5};
+copy_backward(b.begin(), b.begin()+3, b.end());
+// b == {1,2,1,2,3}
+
+// transform
+vector<int> sq(5);
+transform(v.begin(), v.end(), sq.begin(), [](int x){ return x * x; });
+// sq == {1,4,9,16,25}
+
+// fill
+vector<int> f(5);
+fill(f.begin(), f.end(), 7);
+// f == {7,7,7,7,7}
+
+// fill_n
+fill_n(f.begin(), 3, 0);
+// f == {0,0,0,7,7}
+
+// generate
+int i = 0;
+vector<int> g(5);
+generate(g.begin(), g.end(), [&]{ return i++; });
+// g == {0,1,2,3,4}
+
+// replace
+vector<int> r{1,2,3,2,1};
+replace(r.begin(), r.end(), 2, 99);
+// r == {1,99,3,99,1}
+
+// replace_if
+replace_if(r.begin(), r.end(), [](int x){ return x < 3; }, 0);
+// 1s → 0
+
+// remove + erase idiom
+vector<int> rm{1,2,3,2,1};
+rm.erase(remove(rm.begin(), rm.end(), 2), rm.end());
+// rm == {1,3,1}
+
+// remove_if
+rm.erase(remove_if(rm.begin(), rm.end(), [](int x){ return x % 2 != 0; }), rm.end());
+// removes odds
+
+// unique (sort first for global dedup)
+vector<int> u{1,1,2,3,3,3,4};
+u.erase(unique(u.begin(), u.end()), u.end());
+// u == {1,2,3,4}
+
+// reverse
+reverse(v.begin(), v.end());
+// v == {5,4,3,2,1}
+
+// rotate (bring v[2] to front)
+vector<int> rot{1,2,3,4,5};
+rotate(rot.begin(), rot.begin()+2, rot.end());
+// rot == {3,4,5,1,2}
+
+// shuffle
+mt19937 rng(42);
+shuffle(v.begin(), v.end(), rng);
+// v → random order
+
+// for_each
+for_each(v.begin(), v.end(), [](int x){ cout << x << ' '; });
+
+// swap_ranges
+vector<int> a{1,2,3}, bb{4,5,6};
+swap_ranges(a.begin(), a.end(), bb.begin());
+// a=={4,5,6}, bb=={1,2,3}
+
+// merge
+vector<int> m1{1,3,5}, m2{2,4,6}, merged;
+merge(m1.begin(),m1.end(), m2.begin(),m2.end(), back_inserter(merged));
+// merged == {1,2,3,4,5,6}
+
+// inplace_merge
+vector<int> ip{1,3,5,2,4,6};
+inplace_merge(ip.begin(), ip.begin()+3, ip.end());
+// ip == {1,2,3,4,5,6}
+
+// sample (C++17)
+vector<int> smp;
+sample(v.begin(), v.end(), back_inserter(smp), 3, rng);
+// smp == 3 random elements
+```
+
+---
+
+## 5. Logical / Comparison
+
+| Function | Description |
+|---|---|
+| `all_of` | `true` if ALL elements satisfy predicate |
+| `any_of` | `true` if ANY element satisfies predicate |
+| `none_of` | `true` if NO element satisfies predicate |
+| `equal` | `true` if two ranges are element-wise equal |
+| `mismatch` | Iterators to first mismatch in two ranges |
+| `lexicographical_compare` | `true` if first range is lex-less |
+
+```cpp
+vector<int> v{2, 4, 6, 8};
+
+bool allEven  = all_of(v.begin(),  v.end(), [](int x){ return x%2==0; }); // true
+bool anyOver5 = any_of(v.begin(),  v.end(), [](int x){ return x>5;    }); // true
+bool noNeg    = none_of(v.begin(), v.end(), [](int x){ return x<0;    }); // true
+
+vector<int> a{1,2,3}, b{1,9,3};
+bool eq = equal(a.begin(), a.end(), b.begin());
+// eq == false
+
+auto [ia, ib] = mismatch(a.begin(), a.end(), b.begin());
+// *ia == 2, *ib == 9
+
+bool less = lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
+// true because 2 < 9 at position 1
+```
+
+---
+
+## 6. Partitioning
+
+| Function | Description |
+|---|---|
+| `partition` | Elements satisfying predicate come first |
+| `stable_partition` | Like partition, preserves relative order |
+| `partition_point` | Iterator to start of second partition |
+| `is_partitioned` | `true` if range is partitioned by predicate |
+
+```cpp
+vector<int> v{1,2,3,4,5};
+
+// partition
+partition(v.begin(), v.end(), [](int x){ return x%2==0; });
+// evens first: {2,4,1,3,5} (order not guaranteed)
+
+// stable_partition
+stable_partition(v.begin(), v.end(), [](int x){ return x%2==0; });
+// evens first, order preserved: {2,4,1,3,5}
+
+// partition_point
+auto pp = partition_point(v.begin(), v.end(), [](int x){ return x%2==0; });
+// pp points to first odd
+
+// is_partitioned
+bool ok = is_partitioned(v.begin(), v.end(), [](int x){ return x%2==0; });
+// ok == true
+```
+
+---
+
+## 7. Permutations
+
+| Function | Description |
+|---|---|
+| `next_permutation` | Transform to next lex permutation |
+| `prev_permutation` | Transform to previous lex permutation |
+| `is_permutation` | `true` if one range is a permutation of another |
+
+```cpp
+string s = "abc";
+
+next_permutation(s.begin(), s.end());
+// s == "acb"
+
+prev_permutation(s.begin(), s.end());
+// s == "abc"  (back to original)
+
+vector<int> a{1,2,3}, b{3,1,2};
+bool ok = is_permutation(a.begin(), a.end(), b.begin());
+// ok == true
+```
+
+---
+
+## 8. Min / Max
+
+| Function | Description |
+|---|---|
+| `min` | Smaller of two values |
+| `max` | Larger of two values |
+| `minmax` | Pair `{min, max}` of two values |
+| `min_element` | Iterator to smallest in range |
+| `max_element` | Iterator to largest in range |
+| `minmax_element` | Pair of iterators to min and max |
+| `clamp` | Clamp value between `[lo, hi]` |
+
+```cpp
+int a = min(3, 7);           // 3
+int b = max(3, 7);           // 7
+auto [lo, hi] = minmax(3,7); // {3, 7}
+
+vector<int> v{3,1,4,1,5,9};
+auto mn = min_element(v.begin(), v.end()); // *mn == 1
+auto mx = max_element(v.begin(), v.end()); // *mx == 9
+auto [mnIt, mxIt] = minmax_element(v.begin(), v.end());
+
+int clamped = clamp(10, 1, 5); // 5  (clamped to max bound)
+```
+
+---
+
+## 9. Set Operations *(requires sorted input)*
+
+| Function | Description |
+|---|---|
+| `set_union` | Elements in A ∪ B |
+| `set_intersection` | Elements in A ∩ B |
+| `set_difference` | Elements in A but not B |
+| `set_symmetric_difference` | Elements in exactly one of A or B |
+| `includes` | `true` if B is a subset of A |
+
+```cpp
+vector<int> a{1,2,3}, b{2,3,4}, out;
+
+set_union(a.begin(),a.end(), b.begin(),b.end(), back_inserter(out));
+// out == {1,2,3,4}
+
+out.clear();
+set_intersection(a.begin(),a.end(), b.begin(),b.end(), back_inserter(out));
+// out == {2,3}
+
+out.clear();
+set_difference(a.begin(),a.end(), b.begin(),b.end(), back_inserter(out));
+// out == {1}
+
+out.clear();
+set_symmetric_difference(a.begin(),a.end(), b.begin(),b.end(), back_inserter(out));
+// out == {1,4}
+
+bool sub = includes(a.begin(),a.end(), b.begin(),b.end());
+// false — {2,3,4} is not a subset of {1,2,3}
+```
+
+---
+
+## 10. Heap Operations
+
+| Function | Description |
+|---|---|
+| `make_heap` | Rearrange range into a max-heap |
+| `push_heap` | Insert new element into heap |
+| `pop_heap` | Move max to end (call `pop_back` to remove) |
+| `sort_heap` | Sort a heap into ascending order |
+| `is_heap` | `true` if range satisfies heap property |
+| `is_heap_until` | Iterator to first element violating heap |
+
+```cpp
+vector<int> v{3,1,4,1,5,9};
+
+make_heap(v.begin(), v.end());
+// v[0] == 9  (max at front)
+
+v.push_back(7);
+push_heap(v.begin(), v.end());
+// heap property maintained with 7 inserted
+
+pop_heap(v.begin(), v.end());
+v.pop_back();
+// 9 removed
+
+bool ok = is_heap(v.begin(), v.end());
+// ok == true
+
+auto it = is_heap_until(v.begin(), v.end());
+// it points to first element breaking heap
+
+sort_heap(v.begin(), v.end());
+// v now sorted ascending
+```
+
+---
+
+## 11. Numeric Algorithms 📦 `<numeric>`
+
+| Function | Description |
+|---|---|
+| `accumulate` | Sum (or custom fold) of a range |
+| `iota` | Fill with incrementing sequence |
+| `inner_product` | Dot product of two ranges |
+| `partial_sum` | Prefix sums |
+| `adjacent_difference` | Differences of adjacent elements |
+| `reduce` | Like accumulate but parallelizable (C++17) |
+| `exclusive_scan` | Exclusive prefix sum (C++17) |
+| `inclusive_scan` | Inclusive prefix sum (C++17) |
+| `gcd` | Greatest common divisor |
+| `lcm` | Least common multiple |
+
+```cpp
+#include <numeric>
+
+vector<int> v{1,2,3,4,5};
+
+// accumulate
+int sum = accumulate(v.begin(), v.end(), 0);
+// sum == 15
+
+// product via accumulate
+int prod = accumulate(v.begin(), v.end(), 1, multiplies<int>());
+// prod == 120
+
+// iota
+vector<int> seq(5);
+iota(seq.begin(), seq.end(), 1);
+// seq == {1,2,3,4,5}
+
+// inner_product (dot product)
+vector<int> a{1,2,3}, b{4,5,6};
+int dot = inner_product(a.begin(), a.end(), b.begin(), 0);
+// 1*4 + 2*5 + 3*6 == 32
+
+// partial_sum
+vector<int> ps(5);
+partial_sum(v.begin(), v.end(), ps.begin());
+// ps == {1,3,6,10,15}
+
+// adjacent_difference
+vector<int> ad(5);
+adjacent_difference(v.begin(), v.end(), ad.begin());
+// ad == {1,1,1,1,1}
+
+// reduce (C++17, parallelizable)
+int r = reduce(v.begin(), v.end(), 0);
+// r == 15
+
+// exclusive_scan (C++17)
+vector<int> es(5);
+exclusive_scan(v.begin(), v.end(), es.begin(), 0);
+// es == {0,1,3,6,10}
+
+// inclusive_scan (C++17)
+vector<int> is_(5);
+inclusive_scan(v.begin(), v.end(), is_.begin());
+// is_ == {1,3,6,10,15}
+
+// gcd / lcm
+int g = gcd(12, 18); // 6
+int l = lcm(4,  6);  // 12
+```
+
+---
+
+## Quick Summary Table
+
+| Category | Header | Key Functions |
+|---|---|---|
+| Sorting | `<algorithm>` | `sort`, `stable_sort`, `partial_sort`, `nth_element` |
+| Searching | `<algorithm>` | `find`, `binary_search`, `lower_bound`, `upper_bound` |
+| Counting | `<algorithm>` | `count`, `count_if` |
+| Modifying | `<algorithm>` | `copy`, `transform`, `fill`, `replace`, `remove`, `reverse`, `rotate` |
+| Logical | `<algorithm>` | `all_of`, `any_of`, `none_of`, `equal`, `mismatch` |
+| Partitioning | `<algorithm>` | `partition`, `stable_partition`, `partition_point` |
+| Permutations | `<algorithm>` | `next_permutation`, `prev_permutation`, `is_permutation` |
+| Min/Max | `<algorithm>` | `min`, `max`, `clamp`, `min_element`, `max_element` |
+| Set ops | `<algorithm>` | `set_union`, `set_intersection`, `set_difference` |
+| Heap | `<algorithm>` | `make_heap`, `push_heap`, `pop_heap`, `sort_heap` |
+| Numeric | `<numeric>` | `accumulate`, `iota`, `partial_sum`, `gcd`, `lcm` |
