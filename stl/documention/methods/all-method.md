@@ -1,3 +1,97 @@
+
+`#include <bits/stdc++.h>` is a **non-standard GNU C++ header** that simply includes *almost all* standard library headers at once. It doesn’t have an official fixed list defined by the C++ standard, and the exact contents can vary depending on the compiler version (mainly GCC).
+
+However, in practice, it pulls in **almost every commonly used C++ STL and standard header**, including these major groups:
+
+---
+
+## 🔹 1. Input / Output
+
+* `<iostream>`
+* `<cstdio>`
+* `<cstdlib>`
+* `<iomanip>`
+* `<ios>`
+* `<istream>`
+* `<ostream>`
+
+---
+
+## 🔹 2. Containers (STL)
+
+* `<vector>`
+* `<list>`
+* `<deque>`
+* `<array>`
+* `<set>`
+* `<map>`
+* `<unordered_set>`
+* `<unordered_map>`
+* `<stack>`
+* `<queue>`
+
+---
+
+## 🔹 3. Algorithms & Utilities
+
+* `<algorithm>`
+* `<functional>`
+* `<utility>`
+* `<tuple>`
+* `<limits>`
+* `<numeric>`
+* `<iterator>`
+
+---
+
+## 🔹 4. Strings & Characters
+
+* `<string>`
+* `<cstring>`
+* `<cctype>`
+
+---
+
+## 🔹 5. Math & Numbers
+
+* `<cmath>`
+* `<complex>`
+* `<random>`
+* `<ratio>`
+
+---
+
+## 🔹 6. Time & Date
+
+* `<ctime>`
+* `<chrono>`
+
+---
+
+## 🔹 7. File Handling
+
+* `<fstream>`
+* `<sstream>`
+
+---
+
+## 🔹 8. Miscellaneous
+
+* `<bitset>`
+* `<cassert>`
+* `<exception>`
+* `<stdexcept>`
+* `<typeinfo>`
+* `<memory>`
+* `<thread>`
+* `<mutex>`
+* `<future>`
+* `<condition_variable>`
+
+---
+
+
+
 # C++ Standard Library — Complete Headers Reference
 
 ---
